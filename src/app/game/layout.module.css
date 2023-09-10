@@ -1,0 +1,8 @@
+.userProfileButton {
+    margin: 20px;
+}
+
+.parentContainer {
+    height: 100vh;
+    background-image: linear-gradient(135deg, rgb(182, 170, 170), rgb(43, 43, 17));
+}
