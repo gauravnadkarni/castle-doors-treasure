@@ -1,0 +1,23 @@
+.container {
+    border: 1px solid red;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.route {
+    background-color: #C0C0C0;
+    width: 10px;
+    min-height: 40px;
+}
+
+.tracedRoute {
+    background-color: rgb(137, 248, 155);
+}
+
+.lockedRoute {
+    background-color: rgb(255, 26, 26);
+}
+
+

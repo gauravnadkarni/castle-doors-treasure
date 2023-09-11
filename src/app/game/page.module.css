@@ -22,3 +22,12 @@
     border: 1px solid white;
     border-radius: 5px;
 }
+
+.saveButton {
+    position: absolute;
+    left: 1vw;
+    bottom: 1vw;
+    cursor: pointer;
+    border: 1px solid white;
+    border-radius: 5px;
+}
