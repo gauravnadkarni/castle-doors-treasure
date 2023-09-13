@@ -5,7 +5,7 @@ import { PropsWithChildren } from "react";
 
 const Loading:NextPage<PropsWithChildren> = () => {
     return (     
-        <Loader striped animated now={100}/>
+        <Loader borderFlattened striped animated now={100}/>
     )
   }
 

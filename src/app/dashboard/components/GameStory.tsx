@@ -24,7 +24,7 @@ const  GameStory:NextPage<PropsWithChildren<GameStoryProps>>  = (props:PropsWith
 
     return (
         <Accordion defaultActiveKey={defaultStorySiblingIdentifier} alwaysOpen={isAlwaysOpen}>
-            {stories.map((story)=>(<Story {...story}/>))}
+            {stories.map((story, idx)=>(<Story key={`idx-${idx}`} {...story}/>))}
         </Accordion>
     );
 }

@@ -7,6 +7,9 @@ import { useAuth, useUser } from "@clerk/nextjs";
 import GameSelector from "./components/GameSelector";
 import Leaderboard, { LeaderboardProps } from "./components/Leaderboard";
 import GameStory, { GameStoryProps } from "./components/GameStory";
+import { useRouter } from "next/navigation";
+import Leader from "./components/Leader";
+import MyRank from "./components/MyRank";
 
 const LEADERS = [{
     score:12,  
@@ -96,6 +99,7 @@ const GAME_STORIES = {
 }
 
 const  DashboardPage:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
+    const router = useRouter();
     return (
         <Container>
             <Row>
@@ -103,8 +107,12 @@ const  DashboardPage:NextPage<PropsWithChildren>  = (props:PropsWithChildren) =>
                     <div className="d-grid gap-3">
                         <div>
                             <GameSelector 
-                                onClickOfNewGameButton={(e:SyntheticEvent)=>{}}
-                                onClickOfLoadGameButton={(e:SyntheticEvent)=>{}}
+                                onClickOfNewGameButton={(e:SyntheticEvent)=>{
+                                    router.push('/game')
+                                }}
+                                onClickOfLoadGameButton={(e:SyntheticEvent)=>{
+
+                                }}
                             />
                         </div>
                         <div>
@@ -117,7 +125,12 @@ const  DashboardPage:NextPage<PropsWithChildren>  = (props:PropsWithChildren) =>
                     </div>
                 </Col>
                 <Col lg={{ span: 5, offset: 2 }}>
-                    <Leaderboard leaders={LEADERS}/>
+                    <Row>
+                        <Col><Leaderboard leaders={LEADERS}/></Col>
+                    </Row>
+                    <Row>
+                        <Col><MyRank rank={10}  uid="testuser"  score={1000}/></Col>
+                    </Row>
                 </Col>
             </Row>
         </Container>

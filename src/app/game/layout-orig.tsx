@@ -12,7 +12,7 @@ import { XSquareFill } from 'react-bootstrap-icons';
 import { useRouter } from "next/navigation";
 import Dialog from "@/components/Dialog";
 import TreasureRoute from "./components/TreasureRoute";
-import BotMessageBox from "./components/BotMessageBox";
+import BotMessageBox from "./components/MessageBox";
 import BotImageBox from "./components/BotImageBox";
 
 const CONTENT = [{

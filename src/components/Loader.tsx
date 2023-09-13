@@ -10,11 +10,17 @@ export interface LoaderProps {
     striped?: boolean
     animated?: boolean
     variant?: 'success' | 'danger' | 'warning' | 'info'
+    borderFlattened:boolean
 }
 
 const Loader:NextPage<PropsWithChildren<LoaderProps>>  = (props:PropsWithChildren<LoaderProps>)=> {
+    const { 
+        borderFlattened,
+        ...rest
+    } = props;
+
     return (
-        <ProgressBar {...props}/>
+        <ProgressBar style={borderFlattened===true ? {borderRadius:'0px'}:{}} {...rest}/>
     )
 }
 

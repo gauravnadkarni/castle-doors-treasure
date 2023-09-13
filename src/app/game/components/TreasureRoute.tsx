@@ -21,27 +21,28 @@ const  TreasureRoute:NextPage<PropsWithChildren<ScorecardProps>>  = (props:Props
     const steps = [];
     let isCurrentPosition = false;
     let isFailed:boolean = (statusOfCurrentLevel==="failed");
+    let keyProp = 1;
     for(let idx=1;idx<=totalLevels;idx++) {
         let presentPoint = null;
         let connectedForwardRoute = null;
         if(currentLevel > idx) {
-            presentPoint = <div><CheckCircleFill color="green" /></div>
+            presentPoint = <div><CheckCircleFill key={`key_${keyProp++}`} color="green" /></div>
         } else if(currentLevel < idx) {
-            presentPoint = isFailed ? <div><XCircleFill color="red"/></div> : <div><LockFill color="blue"/></div>
+            presentPoint = isFailed ? <div><XCircleFill key={`key_${keyProp++}`} color="red"/></div> : <div><LockFill color="blue"/></div>
         } else {
-            presentPoint = isFailed ? <div><XCircleFill color="red"/></div> : <div><CircleFill color="orange"/></div>
+            presentPoint = isFailed ? <div><XCircleFill key={`key_${keyProp++}`} color="red"/></div> : <div><CircleFill color="orange"/></div>
         }
         steps.push(presentPoint);
         if(idx!==totalLevels) {
             if(idx<currentLevel) {
-                connectedForwardRoute = <div className={classNames({[classes.route]:true},{[classes.tracedRoute]:true},{[classes.lockedRoute]:false})}></div>
+                connectedForwardRoute = <div key={`key_${keyProp++}`} className={classNames({[classes.route]:true},{[classes.tracedRoute]:true},{[classes.lockedRoute]:false})}></div>
             } else {
-                connectedForwardRoute = <div className={classNames({[classes.route]:true},{[classes.tracedRoute]:false},{[classes.lockedRoute]:isFailed})}></div>
+                connectedForwardRoute = <div key={`key_${keyProp++}`} className={classNames({[classes.route]:true},{[classes.tracedRoute]:false},{[classes.lockedRoute]:isFailed})}></div>
             }
             steps.push(connectedForwardRoute);
         }
     }
-
+    steps.reverse();
     return (
         <Row>
             <Col className={classes.container}>

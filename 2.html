@@ -1,0 +1,47 @@
+<html>
+    <head>
+        <style>
+            .doorContainer {
+    display:flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+            .doorFrame{
+    height: 100px;
+    width:50px;
+    border: 18px solid grey;
+    position: relative;
+}
+.closedDoor{
+    height: 100px;
+    width:50px;
+    background-color: #dac02d;
+    transform-origin: left;
+    transition: transform .45s;
+    position: relative;
+    z-index: 2;
+    cursor: pointer;
+}
+.openedDoor{
+    transform: perspective(1200px) rotateY(-100deg);
+}
+.objectBehindDoor {
+    position: absolute;
+    margin: auto;
+    left: 0;
+    right: 0;
+    top:30%;
+    z-index: 1;
+}
+        </style>
+    </head>
+    <body>
+        <div class="doorContainer">
+            <div class="doorFrame">
+              <div class="objectBehindDoor"><div>Hello</div></div>
+              <div class="closedDoor">
+              </div>
+            </div>
+          </div>
+    </body>
+</html>

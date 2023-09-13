@@ -1,0 +1,26 @@
+.doorFrame{
+    height: 100px;
+    border: 15px solid grey;
+    position: relative;
+}
+.door{
+    height: 85px;
+    width:50px;
+    background-color: #dac02d;
+    transform-origin: left;
+    transition: transform .45s;
+    position: relative;
+    z-index: 2;
+    cursor: pointer;
+}
+.openedDoor{
+    transform: perspective(1200px) rotateY(-100deg);
+}
+.objectBehindDoor {
+    position: absolute;
+    margin: auto;
+    left: 0;
+    right: 0;
+    top:30%;
+    z-index: 1;
+}
