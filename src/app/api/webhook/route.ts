@@ -61,6 +61,7 @@ export async function POST(req: Request) {
     first_name:firstName,
     last_name:lastName,
     email_addresses,
+    image_url:imageUrl,
   } = evt.data as any;
   const eventType = evt.type;
 
@@ -72,8 +73,11 @@ export async function POST(req: Request) {
   }
  
   try {
-    await convex.mutation(api.users.save, { email,firstName,lastName, userId });
-    await convex.mutation(api.scores.save, { userId, score: BigInt(0) });
+    const data = await convex.query(api.users.getByUserId,{userId});
+    if(!data) {
+      await convex.mutation(api.users.save, { email,firstName,lastName, userId, imageUrl });
+      await convex.mutation(api.scores.save, { userId, score: BigInt(0) });
+    }
   } catch(err) {
     return new Response('Server Error', { status: 500 })
   }

@@ -7,9 +7,10 @@ export default defineSchema({
     email: v.string(),
     firstName: v.string(),
     lastName: v.string(),
-  }).index("by_token", ["userId"]),
+    imageUrl: v.string(),
+  }).index("byUserId", ["userId"]),
   scores: defineTable({
     userId: v.string(),
     score: v.int64(),
-  }).index("by_token", ["score"]),
+  }).index("byScore", ["score"]),
 });

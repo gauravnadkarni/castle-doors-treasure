@@ -21,7 +21,7 @@ const  Layout:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
                 <Col md={{ span: 11, offset: 0 }}></Col>
                 <Col md={1}>
                     <div className={classes.userProfileButton}>
-                        {!isReady && <Spinner variant="primary"/>}
+                        {!isReady && <span className={classes.spinnerWhite}><Spinner /></span>}
                         {isReady && (<SignedIn><UserButton afterSignOutUrl="/"/></SignedIn>)}
                     </div>
                 </Col>

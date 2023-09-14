@@ -5,42 +5,53 @@ import { PropsWithChildren } from "react";
 import { NextPage } from "next";
 import { useAuth, useUser } from "@clerk/nextjs";
 import Leader, { LeaderProps } from "./Leader";
+import Spinner from "@/components/Spinner";
 
 export interface LeaderboardProps {
-    leaders: Array<LeaderProps>
+    leaders: Array<LeaderProps> | undefined
 }
 
 const  Leaderboard:NextPage<PropsWithChildren<LeaderboardProps>>  = (props:PropsWithChildren<LeaderboardProps>) => {   
     const {leaders} = props;
-    
     return (
         <>
-            <div>Leaderboard</div>
-            <Card>
+            <Card className={classes.panelParent}>
+                <Card.Header>
+                    <span className={classes.headerTitle}>Leaderboard</span>
+                </Card.Header>
                 <Card.Body>
                     <Container fluid>
-                        <Row>
+                        <Row className={classes.headerRow}>
                             <Col lg={2} md={2}>
                                 Rank
                             </Col>
-                            <Col lg={7} md={7}>
-                                User
+                            <Col lg={2} md={2}>
+                                Image
+                            </Col>
+                            <Col lg={5} md={5}>
+                                Name
                             </Col>
                             <Col lg={3} md={3}>
                                 Score
                             </Col>
                         </Row>
-                        {leaders && leaders.map((leader) =>(
+                        {leaders && leaders.map((leader,idx) =>(
                             <Leader 
+                                key={`idx-${idx}`}
+                                index={leader.index+1}
                                 uid={leader.uid}
                                 rank={leader.rank}
                                 score={leader.score}
-                                isCurrentUser={false}
+                                isCurrentUser={leader.isCurrentUser}
+                                email={leader.email}
+                                firstName={leader.firstName}
+                                lastName={leader.lastName}
+                                imageUrl={leader.imageUrl}
                             />)
                         )}
                         {!leaders && (<Row>
-                            <Col lg={12} md={12}>
-                                No leaders as of now
+                            <Col lg={12} md={12} className={classes.centerSpinner}>
+                                <Spinner />
                             </Col>
                         </Row>)}
                     </Container>

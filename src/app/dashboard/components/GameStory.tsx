@@ -6,26 +6,28 @@ import { NextPage } from "next";
 import Story, { StoryProps } from "./Story";
 
 export interface GameStoryProps {
-    stories:Array<StoryProps>
-    defaultStorySiblingIdentifier?:string
-    isAlwaysOpen:boolean
+    heading:string
+    paragraphs:Array<string>
 }
 
 const  GameStory:NextPage<PropsWithChildren<GameStoryProps>>  = (props:PropsWithChildren<GameStoryProps>) => {
     const {
-        stories,
-        defaultStorySiblingIdentifier,
-        isAlwaysOpen,
+        heading,
+        paragraphs,
     } = props;
 
-    if(!stories) {
-        return null;
-    }
-
     return (
-        <Accordion defaultActiveKey={defaultStorySiblingIdentifier} alwaysOpen={isAlwaysOpen}>
-            {stories.map((story, idx)=>(<Story key={`idx-${idx}`} {...story}/>))}
-        </Accordion>
+        <div className={classes.flipCard}>
+            <div className={classes.flipCardInner}>
+                <div className={classes.flipCardFront}>
+                    <img src="/assets/images/castle.png" alt="castle image" style={{width:"100%", height:"500px"}}/>
+                    <div className={classes.flipCardFrontText}>{heading}</div>
+                </div>
+                <div className={classes.flipCardBack}>
+                    {paragraphs && paragraphs.map((paragraph)=>(<p>{paragraph}</p>))}
+                </div>
+            </div>
+        </div>
     );
 }
 

@@ -1,0 +1,29 @@
+.panelParent {
+    background: rgb(153,143,133);
+    background: linear-gradient(270deg, rgba(153,143,133,1) 7%, rgba(153,143,133,0.76234243697479) 51%, rgba(153,143,133,1) 88%);
+    color:white;
+    border: 1px solid black;
+    box-shadow: 10px 10px 20px 0px black;
+  }
+
+  .headerRow {
+    padding: 5px 0px;
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .headerTitle {
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .row {
+    padding:5px;
+    border-radius: 5px;
+    background-color: #686561;
+  }
+
+  .centerSpinner {
+    display:flex;
+    justify-content: center;
+  }

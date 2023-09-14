@@ -1,7 +1,83 @@
 .panelParent {
-    padding: 20px;
+  background: rgb(153,143,133);
+  background: linear-gradient(270deg, rgba(153,143,133,1) 7%, rgba(153,143,133,0.76234243697479) 51%, rgba(153,143,133,1) 88%);
+  color:white;
+  border: 1px solid black;
+  box-shadow: 10px 10px 20px 0px black;
 }
 
 .buttonContainer {
     margin: 20px 0px;
 }
+
+.controlButton {
+    position: relative;
+    font-size: 16px;
+    padding: 0 20px;
+    display: inline-block;
+    border:     none;
+    outline:    none;
+    background:   #FFF;
+    border-radius: 3px;
+    border: 1px solid #1F1F1F;
+  }
+  
+  .buttonRound {
+    height: 4em;
+    width:  4em;
+    border-radius: 100%;
+  }
+  
+  .buttonDark {
+    background: linear-gradient(#737373, #333333);
+    background-size: auto 150%;
+    background-position: 0 100%;
+  }
+
+  .buttonDarkDisabled {
+    background: linear-gradient(#737373, #333333);
+    background-size: auto 150%;
+    background-position: 0 100%;
+  }
+
+  .buttonDark:hover {
+    background-position: 0 50%;
+  }
+
+  .buttonDark:active {
+    color: #000;
+      background-position: 0 50%;
+      background: #333333;
+      box-shadow: inset 0 2px 3px rgba(black, .5), 0 1px 1px rgba(white, .1);
+      
+      .icon:before {
+        color: #111;
+        text-shadow: 0 1px rgba(white, .1);
+      }
+  }
+
+  .icon {
+    font-style: normal;
+    font-size: 40px;
+    display: block;
+    color: #DDD;
+    text-shadow: 0 1px 1px rgba(black, 1);
+    content: attr(data-char);
+  }
+
+  .button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .buttonControl {
+    display:flex;
+    justify-content: center;
+  }
+
+  .headerTitle {
+    font-size: 16px;
+    font-weight: bold;
+  }
+  

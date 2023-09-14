@@ -1,0 +1,22 @@
+.image {
+    width: 30px;
+    height: 30px;
+    border-radius: 30px;
+}
+
+.row {
+    padding:5px;
+    border-radius: 5px;
+}
+
+.rowOdd {
+    background-color: #b1aba5;
+}
+
+.rowEven {
+    background-color: #9e9892;
+}
+
+.currentUserRow {
+    background-color: #686561;
+}
