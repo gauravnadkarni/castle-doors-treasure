@@ -3,5 +3,10 @@
     height: 200px;
     max-height: 200px;
     border: 1px solid black;
+    background: linear-gradient(270deg, rgba(153,143,133,1) 7%, rgba(153,143,133,0.76234243697479) 51%, rgba(153,143,133,1) 88%);
+    color: white;
+    box-shadow: 10px 10px 20px 0px black;
+    text-align: center;
+    border-radius: 5px;
     padding: 10px;
 }

@@ -11,6 +11,7 @@ export interface LoaderProps {
     animated?: boolean
     variant?: 'success' | 'danger' | 'warning' | 'info'
     borderFlattened:boolean
+    label:string
 }
 
 const Loader:NextPage<PropsWithChildren<LoaderProps>>  = (props:PropsWithChildren<LoaderProps>)=> {

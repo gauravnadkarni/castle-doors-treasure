@@ -18,6 +18,7 @@ import { useAction } from "convex/react";
 import GamePanel from "./components/GamePanel";
 import classNames from "classnames";
 import LayoutDetail from "./components/LayoutDetail";
+import LayoutProgress from "./components/LayoutProgress";
 
 const CONTENT = [{
     data:"Hellow, How are you?"
@@ -367,11 +368,11 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
                     </Col>
                 </Row>
                 <Row className={classNames(classes.rowPadding,classes.gameContentBox)}>
-                    <Col lg={1} style={{border:"solid 1px black"}}>
+                    {/*<Col lg={1} style={{border:"solid 1px black"}}>
                         {isLoadingLayout && <Spinner variant="primary" size="sm"/>}
                         {!isLoadingLayout && <TreasureRoute currentLevel={currentLevel} totalLevels={totalLevels} statusOfCurrentLevel="pending"/>}
-                    </Col>
-                    <Col lg={10} className={classes.gamePanel}  style={{border:"solid 1px black"}}>
+                    </Col>*/}
+                    <Col lg={11} className={classes.gamePanel}  style={{border:"solid 1px black"}}>
                         {isLoadingLayout && <Spinner variant="primary" size="sm"/>}
                         {showOverlayOnGame && <div className={classes.overlay}>
                             <div className={classes.overlayMessage}>{overlayMessageOnGame}</div>
@@ -391,7 +392,10 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
                     </Col>
                 </Row>
                 <Row className={classes.rowPadding}>
-                    <Col lg={6}>
+                    <Col lg={4}>
+                        <LayoutProgress castle={{minCastle:1,maxCastle:10,currentCastle}} level={{minLevel:1, maxLevel:10, currentLevel: currentLevel+1}}/>
+                    </Col>
+                    <Col lg={5}>
                         <MessageBox content={autoMessages}/>
                     </Col>
                     <Col lg={2}>
@@ -400,9 +404,6 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
                 </Row>
                 <div className={classes.closeButton}>
                     <XSquareFill size={30} color="brown" onClick={onQuitGame} title="End game without saving"/>
-                </div>
-                <div className={classes.saveButton}>
-                    <SaveFill size={30} color="brown" onClick={onSaveGame} title="Save game"/>
                 </div>
             </div>
             <Dialog 
