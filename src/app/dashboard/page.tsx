@@ -97,13 +97,13 @@ const GAME_STORY = {
         `Objective: The goal of the game is to reach the treasure at the end of each of the 10 castles while managing limited lives.`,
         `There are 10 castles in the game. Each castle has varying levels of doors`,
         `At least one door leads to safe passage, and at least two doors contain a monster.
-        Some doors may be locked, requiring the player to choose another door to find the safe passage.`,
+        Some doors may be blocked, requiring the player to choose another door to find the safe passage.`,
         `The player starts at the first castle.
         In each level, the player must choose a door.
         Safe doors lead to the next level.
         Doors with monsters require a choice, potentially costing health to survive.
         Some doors may contain health, allowing the player to accumulate more health to trade for life later.
-        Locked doors may be present, requiring the player to select another door to find safe passage.
+        Blocked doors may be present, requiring the player to select another door to find safe passage.
         The player continues to choose doors as long as they have at least one health remaining.
         Upon finding a door that leads to safe passage, the player moves to the next level or the next castle.`,
         `Winning: The player wins the game by successfully reaching the treasure in all castles.`,

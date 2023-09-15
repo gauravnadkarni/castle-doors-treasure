@@ -56,29 +56,41 @@ const MESSAGE_LOGS = {
     "P": "You have received {points} points",
     "M": "Monster!!! Encountered. You have {life} health remaining",
     "S": "Please move forward to the next level",
-    "L": "Door is locked and can't be opened.",
+    "L": "Door is blocked and leads to nowhere.",
     "H": "You have received an extra health",
     "T": "Congratulations!! You have found the treasure in this castle.",
     "T_ALL": "Congratulations!! You have recovered all the treasures of life."
 }
 
+const BEHIND_DOOR_IMAGE_OBJECT:{[key : string]:{image:string, alt:string}} = {
+    'P':{image:'/assets/images/objects/points.png',alt:'Reward'},
+    'M':{image:'/assets/images/objects/monster.png',alt:'monster'},
+    'L':{image:'/assets/images/objects/wall.png',alt:'wall'},
+    'H':{image:'/assets/images/objects/health.png',alt:'health'},
+    'S':{image:'/assets/images/objects/passage.png',alt:'safe passage'},
+}
+
 const processLayoutData = (layout: Array<Array<string>>):Array<Array<{
     isDoorClosed:boolean
     object:string
-    isDoorLocked:boolean
+    isDoorBlocked:boolean
+    imageBehindDoor:string
+    imageBehindDoorAltText:string
 }>> => (
     layout.map((level)=>(level.map((item)=>({
-        isDoorClosed:true,
-            object: item,
-            isDoorLocked: item==='L' ? true : false,
-        }
+            isDoorClosed:true,          
+            object: item,                                                                   
+            isDoorBlocked: item==='L' ? true : false,
+            imageBehindDoor: BEHIND_DOOR_IMAGE_OBJECT[item].image,
+            imageBehindDoorAltText: BEHIND_DOOR_IMAGE_OBJECT[item].alt,
+        }                   
     ))
 )));
 
 const getOriginalLayout = (layout: Array<Array<{
     isDoorClosed:boolean
     object:string
-    isDoorLocked:boolean
+    isDoorBlocked:boolean
 }>>):Array<Array<string>> => (
     layout.map((level)=>(level.map((item)=>(item.object))
 )));
@@ -166,7 +178,9 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
         layout:Array<Array<{
             isDoorClosed:boolean
             object:string
-            isDoorLocked:boolean
+            isDoorBlocked:boolean
+            imageBehindDoor:string
+            imageBehindDoorAltText:string
         }>>,
         score:number,
         health:number,
@@ -194,7 +208,10 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
 
     const onClickOfDoor = (level:number, index:number) => {
         const obj = castleLayout.layout[level][index];
-        if(obj.isDoorLocked===true) {
+        if(obj.isDoorClosed===false) {
+            return;
+        }
+        /*if(obj.isDoorBlocked===true) {
             setLayout((prevState)=>{
                 return {
                     ...prevState,
@@ -202,7 +219,7 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
                 }
             })
             return;
-        }
+        }*/
         const objectType = castleLayout.layout[level][index].object;
         let score = castleLayout.score;
         let health = castleLayout.health;
@@ -249,6 +266,8 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
                 overlayMessageOnGame = OVERLAY_MESSAGE_FOR_MONSTER;
             }
             autoMessages = getNewMessageObject(castleLayout.autoMessages,'M',{life:`${health}`});
+        } else if(objectType === 'L') {
+            autoMessages = getNewMessageObject(castleLayout.autoMessages,'L')
         }
 
         const deducedStateObject = {
@@ -358,7 +377,7 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
                         <Scorecard score={score}/>
                     </Col>
                     <Col lg={2}>
-                        <LayoutDetail castle={currentCastle} level={currentCastle}/>
+                        <LayoutDetail castle={currentCastle} level={currentLevel+1}/>
                     </Col>
                     <Col lg={{span:1, offset:8}}>
                         <div className={classes.healthParent}>

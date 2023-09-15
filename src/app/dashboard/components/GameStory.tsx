@@ -24,7 +24,7 @@ const  GameStory:NextPage<PropsWithChildren<GameStoryProps>>  = (props:PropsWith
                     <div className={classes.flipCardFrontText}>{heading}</div>
                 </div>
                 <div className={classes.flipCardBack}>
-                    {paragraphs && paragraphs.map((paragraph)=>(<p>{paragraph}</p>))}
+                    {paragraphs && paragraphs.map((paragraph, idx)=>(<p key={`idx-${idx}`}>{paragraph}</p>))}
                 </div>
             </div>
         </div>

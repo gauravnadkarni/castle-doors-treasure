@@ -1,0 +1,90 @@
+
+.wrapper {
+  height: 150px;
+  width: 100px;
+  border: 5px solid #61412D;
+  position: relative;
+  /* 3D */
+  perspective: 1000px;
+  cursor: pointer;
+  margin: 10px;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.door {
+  background-color: #61412D;
+  height: 100%;
+  width: 50%;
+  position: absolute;
+  padding: 10px;
+  border: 1px solid black;
+  /* inner layout */
+}
+
+.leftDoor {
+  top: 0;
+  left: 0;
+  border-right: 1px solid black;
+  /* transition */
+  transform-origin: left;
+  transition: transform 0.5s;
+}
+
+.rightDoor {
+  top: 0;
+  right: 0;
+  border-left: 1px solid black;
+  /* transition */
+  transform-origin: right;
+  transition: transform 0.5s;
+}
+
+.shapeRow{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: 5px 0px;
+}
+
+.shape {
+  border: 1px solid black;
+  width: 5px;
+  height: 5px;
+  background-color: cornsilk;
+}
+
+.knob {
+  width: 5px;
+  height: 5px;
+  border: 1px solid black;
+  border-radius: 5px;
+  position: absolute;
+}
+
+.leftKnob {
+  top: 50%;
+  right: 10px;
+}
+
+.rightKnob {
+  top: 50%;
+  left: 10px;
+}
+
+/* Door swing effect */
+.leftDoorOpen{
+  transform: rotateY(-110deg);
+}
+
+.rightDoorOpen{
+  transform: rotateY(110deg);
+}
+
+.hideDoorKnob {
+  display: none;
+}

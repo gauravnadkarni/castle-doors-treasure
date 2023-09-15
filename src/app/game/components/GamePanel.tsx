@@ -4,13 +4,16 @@ import classes from "./GamePanel.module.css";
 import { Col, Row } from "react-bootstrap";
 import Door from "./Door";
 import classNames from "classnames";
+import NewDoor from "./NewDoor";
 
 export interface GamePanelProps {
     currentLevel:number,
     layoutOfTheLevel:Array<{
         isDoorClosed:boolean
         object:string
-        isDoorLocked:boolean
+        isDoorBlocked:boolean
+        imageBehindDoor:string
+        imageBehindDoorAltText:string
     }>
     onClickOfDoor:(level:number,index:number)=>void
     doorOpenImage:string
@@ -44,12 +47,25 @@ const GamePanel:NextPage<PropsWithChildren<GamePanelProps>> = (props:PropsWithCh
     }
     return (<Row className={classes.container}>
         <Col lg={12} className={classes.doorContainer}> 
-        {layoutOfTheLevel.map((item, idx)=>(
+        {/*layoutOfTheLevel.map((item, idx)=>(
             <Door key={`idx-${idx}`} isDoorClosed={item.isDoorClosed} isDoorLocked={item.isDoorLocked} onDoorClick={()=>{
                 onClickOfDoor(currentLevel,idx)
             }}>
                 <div>{item.object}</div>
             </Door>
+        ))*/}
+        {layoutOfTheLevel.map((item, idx)=>(
+            <NewDoor 
+                key={`idx-${idx}`} 
+                isDoorClosed={item.isDoorClosed} 
+                onDoorClick={()=>{
+                    onClickOfDoor(currentLevel,idx)
+                }}
+                objectImagePath={item.imageBehindDoor}
+                objectImageAlt={item.imageBehindDoorAltText}
+            >
+                <div>{item.object}</div>
+            </NewDoor>
         ))}
          </Col>
     </Row>);
