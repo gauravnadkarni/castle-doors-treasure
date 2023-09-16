@@ -14,7 +14,7 @@ const  LayoutDetail:NextPage<PropsWithChildren<LayoutDetailProps>>  = (props:Pro
         castle,
         level,
     } = props
-
+    
     return (
         <div className={classes.container}>
             <span className={classes.castleSpan}>Castle : {castle}</span>

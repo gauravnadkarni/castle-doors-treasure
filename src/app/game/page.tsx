@@ -4,7 +4,7 @@ import { api } from "../../../convex/_generated/api";
 import classes from './page.module.css';
 import { PropsWithChildren, SyntheticEvent, useEffect, useState } from "react";
 import { NextPage } from "next";
-import { SignOutButton, SignedIn, UserButton } from "@clerk/nextjs";
+import { SignOutButton, SignedIn, UserButton, useUser } from "@clerk/nextjs";
 import Spinner from "@/components/Spinner";
 import Scorecard from "./components/Scorecard";
 import Health from "./components/Health";
@@ -14,7 +14,7 @@ import Dialog from "@/components/Dialog";
 import TreasureRoute from "./components/TreasureRoute";
 import MessageBox from "./components/MessageBox";
 import BotImageBox from "./components/BotImageBox";
-import { useAction } from "convex/react";
+import { useAction, useMutation } from "convex/react";
 import GamePanel from "./components/GamePanel";
 import classNames from "classnames";
 import LayoutDetail from "./components/LayoutDetail";
@@ -151,18 +151,18 @@ const getNewMessageObject = (messages:Array<{data:string, formatting?:{[key: str
 
 const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
     const router = useRouter();
+    const { user } = useUser();
     const initialLayoutState = {
-        currentCastle:1,
+        currentCastle:10,  ///1 - initial value
         totalCastles:10,
-        currentLevel:0,
-        totalLevels:8,
+        currentLevel:9,  //0 - initial value
+        totalLevels:9,
         layout:[],
         score:0,
         health:5,
         isLoadingLayout:true,
         isLoadingLevel:true,
         isGameLost:false,
-        moveToNextCastle:false,
         isCastleCaptured:false,
         showOverlayOnGame: false,
         overlayMessageOnGame:"",
@@ -172,6 +172,7 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
     const [showQuitGameConfirmationModal, setShowQuitGameConfirmationModal] = useState(false);
     const [showSaveGameConfirmationModal, setSaveGameConfirmationModal] = useState(false);
     const [showLostGameModal, setShowLostGameModal] = useState(false);
+    const updateScore = useMutation(api.scores.updateMyScore);
     const [castleLayout, setLayout] = useState<{
         currentCastle:number,
         currentLevel:number,
@@ -189,7 +190,6 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
         isLoadingLayout:boolean,
         isLoadingLevel:boolean,
         isGameLost:boolean,
-        moveToNextCastle:boolean,
         isCastleCaptured:boolean,
         showOverlayOnGame:boolean,
         overlayMessageOnGame:string,
@@ -204,6 +204,19 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
 
     const onSaveGame = (e:SyntheticEvent) => {
         setSaveGameConfirmationModal(true);
+    }
+
+    const onClickMoveToNextCastle =() =>{
+        setLayout((prevState) => ({
+            ...prevState,
+            currentCastle:prevState.currentCastle+1,
+            currentLevel:0,
+            layout:[],
+            isGameLost:false,
+            isLoadingLayout:true, 
+            isLoadingLevel:true,
+            isCastleCaptured:false,
+        }));
     }
 
     const onClickOfDoor = (level:number, index:number) => {
@@ -240,7 +253,6 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
             }
             autoMessages = getNewMessageObject(castleLayout.autoMessages,'H')
         } else if(objectType === 'S') {
-            showOverlayOnGame=true;
             if(castleLayout.currentLevel===castleLayout.totalLevels) {
                 score=score+(castleLayout.currentCastle*1000);
                 if(castleLayout.health<5) {
@@ -248,14 +260,17 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
                 }
                 isCastleCaptured = true;
                 currentCastle++;
-                currentLevel=0;
+                currentLevel++;
                 overlayMessageOnGame = OVERLAY_MESSAGE_FOR_TREASURE;
+                autoMessages = getNewMessageObject(castleLayout.autoMessages,'T');
             } else {
+                showOverlayOnGame=true;
                 score=score+(castleLayout.currentCastle*100);
                 currentLevel= currentLevel+1;
                 overlayMessageOnGame = OVERLAY_MESSAGE_FOR_SAFE_PASSAGE;
+                autoMessages = getNewMessageObject(castleLayout.autoMessages,'S');
             }
-            autoMessages = getNewMessageObject(castleLayout.autoMessages,'S');
+            
         } else if(objectType === 'M') {
             health--;
             showOverlayOnGame=true;
@@ -293,8 +308,28 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
             overlayMessageOnGame:"",
             autoMessages,
         };
-
-        if(showOverlayOnGame === true) {
+        if(isCastleCaptured===true) {
+            updateScore({userId: user ? user.id :"", score:BigInt(score)}); // to update the score in the backend after capturing the castle
+            setLayout((prevState) => ({
+                ...prevState,
+                layout: castleLayout.layout.map((levelArray, levelIdx)=>{
+                    return levelArray.map((item, itemIdx)=>{
+                        if(levelIdx===level && index === itemIdx) {
+                            return {
+                                ...item,
+                                isDoorClosed:false,
+                            }
+                        }
+                        return item;
+                    })
+                }),
+                autoMessages,
+                health,
+                score,
+                currentLevel,//required to show 100% in layout details for level
+                isCastleCaptured
+            }));
+        } else if(showOverlayOnGame === true) {
             setLayout((prevState) => ({
                 ...prevState,
                 layout: castleLayout.layout.map((levelArray, levelIdx)=>{
@@ -327,12 +362,17 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
         }
     };
     
-    useEffect(()=>{
+    /*useEffect(()=>{
+        console.log("1------------------------------------")
         setIsReady(true);
         chat({messageBody:INSTRUCTIONS.replace("{first}","3").replace("{second}","5").replace("{third}","6")}).then((messageLayout)=>{
             const processedLayout = processLayoutData(messageLayout);
             setLayout({...castleLayout, layout:processedLayout, isLoadingLayout:false, isLoadingLevel:false, totalLevels:messageLayout.length})
         });
+    },[]);*/
+
+    useEffect(()=>{
+        console.log(castleLayout)
     },[]);
 
     useEffect(()=>{
@@ -344,16 +384,12 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
                 layout:processedLayout,
                 isLoadingLayout:false, 
                 isLoadingLevel:false, 
-                totalLevels:messageLayout.length,
+                totalLevels:messageLayout.length-1,
                 showOverlayOnGame:false,
                 overlayMessageOnGame:"",
             })
         });
     },[castleLayout.currentCastle]);
-
-    useEffect(()=>{
-        console.log(castleLayout)
-    })
 
     const {
         score,
@@ -367,6 +403,7 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
         showOverlayOnGame,
         overlayMessageOnGame,
         autoMessages,
+        isCastleCaptured,
     } = castleLayout;
 
     return (
@@ -381,8 +418,7 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
                     </Col>
                     <Col lg={{span:1, offset:8}}>
                         <div className={classes.healthParent}>
-                            {isLoadingLayout && <Spinner variant="primary" size="sm"/>}
-                            {!isLoadingLayout && <Health maxHealthValue={5} currentHealthValue={health}/>}
+                            {<Health maxHealthValue={5} currentHealthValue={health}/>}
                         </div>
                     </Col>
                 </Row>
@@ -391,8 +427,8 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
                         {isLoadingLayout && <Spinner variant="primary" size="sm"/>}
                         {!isLoadingLayout && <TreasureRoute currentLevel={currentLevel} totalLevels={totalLevels} statusOfCurrentLevel="pending"/>}
                     </Col>*/}
-                    <Col lg={11} className={classes.gamePanel}  style={{border:"solid 1px black"}}>
-                        {isLoadingLayout && <Spinner variant="primary" size="sm"/>}
+                    <Col lg={11} className={classNames(classes.gamePanel,{[classes.gradientBackground]:!isCastleCaptured},{[classes.blackBackground]:isCastleCaptured})}  style={{border:"solid 1px black"}}>
+                        {isLoadingLayout && <div className={classes.centerSpinner}><Spinner variant="secondary"/></div>}
                         {showOverlayOnGame && <div className={classes.overlay}>
                             <div className={classes.overlayMessage}>{overlayMessageOnGame}</div>
                         </div>}
@@ -400,19 +436,18 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
                             currentLevel={currentLevel}
                             layoutOfTheLevel={layout[currentLevel]}
                             onClickOfDoor={onClickOfDoor}
-                            doorCloseImage=""
-                            doorOpenImage=""
-                            healthImage=""
-                            lockedDoorImage=""
-                            monsterImage=""
-                            pointsImage=""
-                            safePassageImage=""
+                            showImageOnPanel={isCastleCaptured}
+                            imageOnPanelPath="/assets/images/objects/treasure.png"
+                            imageOnPanelAltText="Treasure"
+                            imageOnPanelText="You have found the Treasure"
+                            imageOnPanelButtonText="Move to next Castle"
+                            imageOnPanelOnClick={onClickMoveToNextCastle}
                         />}
                     </Col>
                 </Row>
                 <Row className={classes.rowPadding}>
                     <Col lg={4}>
-                        <LayoutProgress castle={{minCastle:1,maxCastle:10,currentCastle}} level={{minLevel:1, maxLevel:10, currentLevel: currentLevel+1}}/>
+                        <LayoutProgress castle={{minCastle:0,maxCastle:10,currentCastle:currentCastle-1}} level={{minLevel:0, maxLevel:10, currentLevel: currentLevel}}/>
                     </Col>
                     <Col lg={5}>
                         <MessageBox content={autoMessages}/>

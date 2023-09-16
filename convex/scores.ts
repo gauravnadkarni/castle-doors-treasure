@@ -43,3 +43,22 @@ export const getMyScore = query({
     }
   },
 });
+
+export const updateMyScore = mutation({
+  args: { userId: v.string(), score: v.int64() },
+  handler: async (ctx, args) => {
+    const { userId, score } = args;
+    const myScore = await ctx.db.query("scores").filter((q) => q.eq(q.field("userId"), userId)).first();
+    
+    if(!myScore) {
+      return;
+    }
+    let dbScore = 0n;
+    if(myScore && myScore.score) {
+      dbScore = myScore.score
+    }
+    dbScore+=score;
+ 
+    await ctx.db.patch(myScore._id, { score: dbScore});
+  },
+});

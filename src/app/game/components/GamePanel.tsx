@@ -1,7 +1,7 @@
 import { PropsWithChildren, SyntheticEvent } from "react";
 import { NextPage } from "next";
 import classes from "./GamePanel.module.css";
-import { Col, Row } from "react-bootstrap";
+import { Button, Col, Row } from "react-bootstrap";
 import Door from "./Door";
 import classNames from "classnames";
 import NewDoor from "./NewDoor";
@@ -16,37 +16,29 @@ export interface GamePanelProps {
         imageBehindDoorAltText:string
     }>
     onClickOfDoor:(level:number,index:number)=>void
-    doorOpenImage:string
-    doorCloseImage:string
-    monsterImage:string
-    pointsImage:string
-    healthImage:string
-    lockedDoorImage:string
-    safePassageImage:string
+    showImageOnPanel:boolean
+    imageOnPanelPath:string
+    imageOnPanelAltText:string
+    imageOnPanelText:string
+    imageOnPanelButtonText:string
+    imageOnPanelOnClick:()=>void
 } 
 
 const GamePanel:NextPage<PropsWithChildren<GamePanelProps>> = (props:PropsWithChildren<GamePanelProps>) => {
     const {
         currentLevel,
         layoutOfTheLevel,
-        onClickOfDoor,   
-        doorOpenImage,
-        doorCloseImage,
-        monsterImage,
-        pointsImage,
-        healthImage,
-        lockedDoorImage,
-        safePassageImage,
+        onClickOfDoor,
+        showImageOnPanel,
+        imageOnPanelPath,
+        imageOnPanelAltText,
+        imageOnPanelText,
+        imageOnPanelButtonText,
+        imageOnPanelOnClick,
     } = props;
-
-    let lgDoorSize:number = 1;
-    if(layoutOfTheLevel.length<=5) {
-        lgDoorSize = 2;
-    } else if(layoutOfTheLevel.length<10) {
-        lgDoorSize = 4;
-    }
-    return (<Row className={classes.container}>
-        <Col lg={12} className={classes.doorContainer}> 
+    
+    return (<Row className={classNames(classes.container, {[classes.blackBackground]:showImageOnPanel})}>
+        {!showImageOnPanel &&<Col lg={12} className={classes.doorContainer}> 
         {/*layoutOfTheLevel.map((item, idx)=>(
             <Door key={`idx-${idx}`} isDoorClosed={item.isDoorClosed} isDoorLocked={item.isDoorLocked} onDoorClick={()=>{
                 onClickOfDoor(currentLevel,idx)
@@ -67,7 +59,12 @@ const GamePanel:NextPage<PropsWithChildren<GamePanelProps>> = (props:PropsWithCh
                 <div>{item.object}</div>
             </NewDoor>
         ))}
-         </Col>
+         </Col>}
+         {showImageOnPanel && <Col lg={12} className={classes.imageContainer}>
+                <img src={imageOnPanelPath} alt={imageOnPanelAltText}/>
+                <div className={classes.imagePanelText}>{imageOnPanelText}</div>
+                <Button variant="secondary" onClick={imageOnPanelOnClick}>{imageOnPanelButtonText}</Button>
+        </Col>}
     </Row>);
 }
 

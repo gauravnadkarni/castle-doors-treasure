@@ -16,6 +16,10 @@
   object-fit: cover;
 }
 
+.imageHide {
+  display: none;
+}
+
 .door {
   background-color: #61412D;
   height: 100%;

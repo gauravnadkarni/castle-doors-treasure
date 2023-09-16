@@ -25,7 +25,7 @@ const  NewDoor:NextPage<PropsWithChildren<NewDoorProps>>  = (props:PropsWithChil
         <div className={classes.wrapper} onClick={(e)=>{
                 onDoorClick(e);
             }}>
-            {(objectImagePath && objectImageAlt) && <img src={objectImagePath} alt={objectImageAlt} className={classes.image}/>}
+            {(objectImagePath && objectImageAlt) && <img src={objectImagePath} alt={objectImageAlt} className={classNames(classes.image,{[classes.imageHide]:isDoorClosed})}/>}
             <div className={classNames(classes.door,classes.leftDoor,{[classes.leftDoorOpen]:!isDoorClosed})}>
                 {new Array(SHAPE_ROW_COUNT).fill(0).map((obj, idx)=>(<div key={`idx-${idx}`} className={classes.shapeRow}>
                     <div className={classes.shape}></div>

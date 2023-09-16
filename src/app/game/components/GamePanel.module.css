@@ -10,3 +10,16 @@
     flex-wrap: wrap;
 }
 
+.imageContainer > img    {
+    width:150px;
+    height:150px;
+}
+
+.blackBackground {
+    background-color: black;
+}
+
+.imagePanelText {
+    font-size: 30px;
+}
+
