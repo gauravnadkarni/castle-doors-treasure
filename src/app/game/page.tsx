@@ -153,27 +153,29 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
     const router = useRouter();
     const { user } = useUser();
     const initialLayoutState = {
-        currentCastle:10,  ///1 - initial value
+        lostGaurdCounter:0,
+        currentCastle:1,  ///1 - initial value
         totalCastles:10,
-        currentLevel:9,  //0 - initial value
+        currentLevel:0,  //0 - initial value
         totalLevels:9,
         layout:[],
         score:0,
+        scorePerCastle:0,
         health:5,
         isLoadingLayout:true,
         isLoadingLevel:true,
         isGameLost:false,
         isCastleCaptured:false,
+        areAllCastlesCaptured:false,
         showOverlayOnGame: false,
         overlayMessageOnGame:"",
         autoMessages:[],
     };
     const [isReady, setIsReady] = useState(false);
     const [showQuitGameConfirmationModal, setShowQuitGameConfirmationModal] = useState(false);
-    const [showSaveGameConfirmationModal, setSaveGameConfirmationModal] = useState(false);
-    const [showLostGameModal, setShowLostGameModal] = useState(false);
     const updateScore = useMutation(api.scores.updateMyScore);
     const [castleLayout, setLayout] = useState<{
+        lostGaurdCounter:number,
         currentCastle:number,
         currentLevel:number,
         layout:Array<Array<{
@@ -184,6 +186,7 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
             imageBehindDoorAltText:string
         }>>,
         score:number,
+        scorePerCastle:number,
         health:number,
         totalCastles:number,
         totalLevels:number,
@@ -193,6 +196,7 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
         isCastleCaptured:boolean,
         showOverlayOnGame:boolean,
         overlayMessageOnGame:string,
+        areAllCastlesCaptured:boolean,
         autoMessages:Array<{data:string, formatting?:{[key: string]:string}}>,
     }>(initialLayoutState);
     const [chatMessages, setChatMessages] = useState({messages:[]});
@@ -202,11 +206,12 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
         setShowQuitGameConfirmationModal(true);
     }
 
-    const onSaveGame = (e:SyntheticEvent) => {
-        setSaveGameConfirmationModal(true);
-    }
-
     const onClickMoveToNextCastle =() =>{
+        const areAllCastlesCaptured = castleLayout.areAllCastlesCaptured;
+        if(areAllCastlesCaptured===true) {
+            setLayout(initialLayoutState);
+            return;
+        }
         setLayout((prevState) => ({
             ...prevState,
             currentCastle:prevState.currentCastle+1,
@@ -242,10 +247,13 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
         let currentCastle = castleLayout.currentCastle;
         let showOverlayOnGame = castleLayout.showOverlayOnGame;
         let overlayMessageOnGame = castleLayout.overlayMessageOnGame;
+        let areAllCastlesCaptured =  castleLayout.areAllCastlesCaptured;
         let autoMessages = castleLayout.autoMessages;
+        let scorePerCastle = castleLayout.scorePerCastle;
         if(objectType === 'P') {
             let points = castleLayout.currentCastle*(castleLayout.currentLevel+1)*50;
             score+=points;
+            scorePerCastle=score;
             autoMessages = getNewMessageObject(castleLayout.autoMessages,'P',{'points':`${points}`})
         } else if(objectType === 'H') {
             if(castleLayout.health<5) {
@@ -255,17 +263,24 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
         } else if(objectType === 'S') {
             if(castleLayout.currentLevel===castleLayout.totalLevels) {
                 score=score+(castleLayout.currentCastle*1000);
+                scorePerCastle= score;
                 if(castleLayout.health<5) {
                     health++;
                 }
                 isCastleCaptured = true;
                 currentCastle++;
-                currentLevel++;
+                currentLevel= currentLevel+1;
                 overlayMessageOnGame = OVERLAY_MESSAGE_FOR_TREASURE;
-                autoMessages = getNewMessageObject(castleLayout.autoMessages,'T');
+                if(castleLayout.currentCastle===castleLayout.totalCastles) {
+                    areAllCastlesCaptured =true;
+                    autoMessages = getNewMessageObject(castleLayout.autoMessages,'T_ALL');
+                } else {
+                    autoMessages = getNewMessageObject(castleLayout.autoMessages,'T');
+                }
             } else {
                 showOverlayOnGame=true;
                 score=score+(castleLayout.currentCastle*100);
+                scorePerCastle= score;
                 currentLevel= currentLevel+1;
                 overlayMessageOnGame = OVERLAY_MESSAGE_FOR_SAFE_PASSAGE;
                 autoMessages = getNewMessageObject(castleLayout.autoMessages,'S');
@@ -299,6 +314,7 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
                 })
             }),
             score,
+            scorePerCastle,
             health,
             isCastleCaptured,
             isGameLost,
@@ -308,8 +324,19 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
             overlayMessageOnGame:"",
             autoMessages,
         };
-        if(isCastleCaptured===true) {
-            updateScore({userId: user ? user.id :"", score:BigInt(score)}); // to update the score in the backend after capturing the castle
+        if(areAllCastlesCaptured===true){
+            updateScore({userId: user ? user.id :"", score:BigInt(scorePerCastle)});
+            setLayout((prevState) => ({
+                ...prevState,
+                autoMessages,
+                currentCastle,
+                currentLevel,//required to show 100% in layout details for level
+                isCastleCaptured,
+                areAllCastlesCaptured,
+                scorePerCastle:0,
+            }));
+        } else if(isCastleCaptured===true) {
+            updateScore({userId: user ? user.id :"", score:BigInt(scorePerCastle)}); // to update the score in the backend after capturing the castle
             setLayout((prevState) => ({
                 ...prevState,
                 layout: castleLayout.layout.map((levelArray, levelIdx)=>{
@@ -326,8 +353,28 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
                 autoMessages,
                 health,
                 score,
+                scorePerCastle:0,
                 currentLevel,//required to show 100% in layout details for level
-                isCastleCaptured
+                isCastleCaptured,
+                areAllCastlesCaptured,
+            }));
+        } else if(isGameLost===true) {
+            setLayout((prevState) => ({
+                ...prevState,
+                layout: castleLayout.layout.map((levelArray, levelIdx)=>{
+                    return levelArray.map((item, itemIdx)=>{
+                        if(levelIdx===level && index === itemIdx) {
+                            return {
+                                ...item,
+                                isDoorClosed:false,
+                            }
+                        }
+                        return item;
+                    })
+                }),
+                autoMessages,
+                scorePerCastle:0,
+                isGameLost,
             }));
         } else if(showOverlayOnGame === true) {
             setLayout((prevState) => ({
@@ -389,7 +436,7 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
                 overlayMessageOnGame:"",
             })
         });
-    },[castleLayout.currentCastle]);
+    },[castleLayout.currentCastle, castleLayout.lostGaurdCounter]);
 
     const {
         score,
@@ -404,6 +451,9 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
         overlayMessageOnGame,
         autoMessages,
         isCastleCaptured,
+        areAllCastlesCaptured,
+        isGameLost,
+        lostGaurdCounter,
     } = castleLayout;
 
     return (
@@ -414,7 +464,7 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
                         <Scorecard score={score}/>
                     </Col>
                     <Col lg={2}>
-                        <LayoutDetail castle={currentCastle} level={currentLevel+1}/>
+                        <LayoutDetail castle={(currentCastle>10)?(10):(currentCastle)} level={((currentLevel+1)>10)?(10):(currentLevel+1)}/>
                     </Col>
                     <Col lg={{span:1, offset:8}}>
                         <div className={classes.healthParent}>
@@ -439,8 +489,8 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
                             showImageOnPanel={isCastleCaptured}
                             imageOnPanelPath="/assets/images/objects/treasure.png"
                             imageOnPanelAltText="Treasure"
-                            imageOnPanelText="You have found the Treasure"
-                            imageOnPanelButtonText="Move to next Castle"
+                            imageOnPanelText={((areAllCastlesCaptured===true) ? ("You have found all the gold."):("You have found the treasure."))}
+                            imageOnPanelButtonText={((areAllCastlesCaptured===true) ? ("Click to play again"):("Go to the next Castle"))}
                             imageOnPanelOnClick={onClickMoveToNextCastle}
                         />}
                     </Col>
@@ -477,29 +527,19 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
                 heading="Quit Game??"
             />
             <Dialog 
-                showModal={showLostGameModal}
+                showModal={isGameLost}
                 confirm={{
                     confirmModal: ()=>{
                         router.push("/dashboard");
-                        setShowLostGameModal(false);
                     },
                     confirmModalButtonText: "Yes"
                 }}
                 cancelModal={()=>{
-                    setShowLostGameModal(false);
+                    setLayout(()=>({...initialLayoutState,lostGaurdCounter:lostGaurdCounter+1}));
                 }}
                 cancelModalButtonText="No"
                 content="Are you sure about ending the game?"
                 heading="End Game??"
-            />
-            <Dialog 
-                showModal={showSaveGameConfirmationModal}
-                cancelModal={()=>{
-                    setSaveGameConfirmationModal(false);
-                }}
-                cancelModalButtonText="Ok"
-                content="Your game has been saved. Please not that you will be able to load the game from the first level of the current catle only."
-                heading="Saving Game"
             />
         </>
     );
