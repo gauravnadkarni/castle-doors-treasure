@@ -10,3 +10,9 @@
     border-radius: 5px;
     padding: 10px;
 }
+
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

@@ -20,32 +20,34 @@ import classNames from "classnames";
 import LayoutDetail from "./components/LayoutDetail";
 import LayoutProgress from "./components/LayoutProgress";
 
-const CONTENT = [{
-    data:"Hellow, How are you?"
-},{
-    data:"Hellow, How are you?"
-},{
-    data:"Hellow, How are you?"
-},{
-    data:"Hellow, How are you?"
-},{
-    data:"Hellow, How are you?"
-},{
-    data:"Hellow, How are you?"
-},];
 
+const FAILSAFE_MATRIX_DATA = [
+  ["M", "P", "L", "S", "S"],
+  ["S", "S", "M", "L", "M", "P"],
+  ["L", "P", "S", "M", "S", "M", "M"],
+  ["H", "M", "S", "S", "L", "P", "M", "M", "M"],
+  ["P", "L", "M", "M", "S", "M", "L", "S", "P"],
+  ["M", "H", "S", "S", "M", "P", "L", "L", "M", "P", "S", "S"],
+  ["H", "S", "H", "L", "M", "P", "M", "L", "M", "M", "P", "L", "S"],
+  ["M", "P", "S", "L", "L", "S", "M", "S", "P", "M", "M", "L", "P"],
+  ["L", "H", "P", "M", "S", "M", "S", "P", "L", "P", "M", "L", "M", "S", "P"],
+  ["S", "L", "P", "M", "S", "M", "S", "P", "L", "H", "P", "M", "L", "M", "S"],
+];
 
-const INSTRUCTIONS = `Can you give me a two dimensional json array which satisfies the following conditions? 
+const INITIAL_INSTRUCTIONS = `Can you give me a two dimensional json array and not program  which satisfies the following conditions? 
 - Row with index 0 should start with 5 elements
 - There should be 10 rows 
-- Each row should have length one more than the previous row length
+- Each row should have length at least one more than the previous row length
 - Elements could be one of the following:'M','P','L', 'S'
 - There should always be more number of 'S' than 'M' in rows with index less than 3
 - There should always be more number of 'M' than 'S', 'P' or 'L' in rows with index greater than 2 and less than 6
 - There should be exactly 2 'S' in the rows with index greater 5
 - Each row should have at least one character of each type
 - These characters should be placed in random order in a row
-- At row with indices {first},{second} and {third}  you can add one H element at any random position`;
+- At row with numbers {first},{second} and {third} you can add one H element at any random position
+Please give only the array and no explanation`;
+
+const ROTATION_INSTRUCTION = `Can you right rotate and return all the rows in the given two dimensional array by {number}? Please do not give me the program to do this.`
 
 const OVERLAY_MESSAGE_FOR_MONSTER = "You have been caught by the Monster";
 const OVERLAY_MESSAGE_FOR_END_GAME = "You have lost the game";
@@ -69,6 +71,8 @@ const BEHIND_DOOR_IMAGE_OBJECT:{[key : string]:{image:string, alt:string}} = {
     'H':{image:'/assets/images/objects/health.png',alt:'health'},
     'S':{image:'/assets/images/objects/passage.png',alt:'safe passage'},
 }
+
+const DEFAULT_EMOJI_PATH = "/assets/images/emojis/default.png";
 
 const processLayoutData = (layout: Array<Array<string>>):Array<Array<{
     isDoorClosed:boolean
@@ -170,6 +174,8 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
         showOverlayOnGame: false,
         overlayMessageOnGame:"",
         autoMessages:[],
+        botImagePath:DEFAULT_EMOJI_PATH,
+        botImageLoading:false,
     };
     const [isReady, setIsReady] = useState(false);
     const [showQuitGameConfirmationModal, setShowQuitGameConfirmationModal] = useState(false);
@@ -198,9 +204,12 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
         overlayMessageOnGame:string,
         areAllCastlesCaptured:boolean,
         autoMessages:Array<{data:string, formatting?:{[key: string]:string}}>,
+        botImagePath:string,
+        botImageLoading:boolean
     }>(initialLayoutState);
-    const [chatMessages, setChatMessages] = useState({messages:[]});
-    const chat = useAction(api.openai.chat);
+    const getLayoutAction = useAction(api.logic.getLayout);
+    const rotateLayoutAction = useAction(api.logic.getRotatedLayout);
+    const getEmotionImageAction = useAction(api.logic.getEmotionImage);
 
     const onQuitGame = (e:SyntheticEvent) => {
         setShowQuitGameConfirmationModal(true);
@@ -301,7 +310,6 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
         }
 
         const deducedStateObject = {
-            ...castleLayout,
             layout: castleLayout.layout.map((levelArray, levelIdx)=>{
                 return levelArray.map((item, itemIdx)=>{
                     if(levelIdx===level && index === itemIdx) {
@@ -408,25 +416,32 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
             setLayout((prevState)=>({...prevState, ...deducedStateObject}))
         }
     };
-    
-    /*useEffect(()=>{
-        console.log("1------------------------------------")
-        setIsReady(true);
-        chat({messageBody:INSTRUCTIONS.replace("{first}","3").replace("{second}","5").replace("{third}","6")}).then((messageLayout)=>{
-            const processedLayout = processLayoutData(messageLayout);
-            setLayout({...castleLayout, layout:processedLayout, isLoadingLayout:false, isLoadingLevel:false, totalLevels:messageLayout.length})
-        });
-    },[]);*/
 
     useEffect(()=>{
         console.log(castleLayout)
-    },[]);
+    });
 
     useEffect(()=>{
         setLayout({...castleLayout, isLoadingLayout:true, isLoadingLevel:true});
-        chat({messageBody:INSTRUCTIONS.replace("{first}","3").replace("{second}","5").replace("{third}","6")}).then((messageLayout)=>{
+        if(castleLayout.currentCastle===1) {
+            getLayoutAction({messageBody:INITIAL_INSTRUCTIONS.replace("{first}","3").replace("{second}","5").replace("{third}","6")}).then((messageLayout)=>{
+                const processedLayout = processLayoutData(messageLayout);
+                setLayout((prevState)=>({
+                    ...castleLayout,
+                    layout:processedLayout,
+                    isLoadingLayout:false, 
+                    isLoadingLevel:false, 
+                    totalLevels:messageLayout.length-1,
+                    showOverlayOnGame:false,
+                    overlayMessageOnGame:"",
+                }));
+            });
+            return;
+        }
+        const num = Math.random()*10;
+        rotateLayoutAction({messageBody:ROTATION_INSTRUCTION.replace("{number}",`${num}`)+` ${JSON.stringify(FAILSAFE_MATRIX_DATA)}`}).then((messageLayout)=>{
             const processedLayout = processLayoutData(messageLayout);
-            setLayout({
+            setLayout((prevState)=>({
                 ...castleLayout,
                 layout:processedLayout,
                 isLoadingLayout:false, 
@@ -434,9 +449,28 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
                 totalLevels:messageLayout.length-1,
                 showOverlayOnGame:false,
                 overlayMessageOnGame:"",
-            })
+            }));
         });
     },[castleLayout.currentCastle, castleLayout.lostGaurdCounter]);
+
+    useEffect(() => {
+        if(!castleLayout.autoMessages || castleLayout.autoMessages.length===0) {
+            return;
+        }
+        console.log("I am here")
+        setLayout((prevState)=>{
+            console.log("I am here 1")
+            return {...prevState, botImageLoading: true, botImagePath:""}
+        });
+        const lastMessageObject = castleLayout.autoMessages[castleLayout.autoMessages.length-1];
+        getEmotionImageAction({messageBody:lastMessageObject.data}).then((imagePath:string|null)=>{
+            console.log("I am here 2")
+            setLayout((prevState)=>{
+                console.log("I am here 3")
+                return {...prevState, botImagePath: imagePath ? imagePath : DEFAULT_EMOJI_PATH, botImageLoading:false};
+            });
+        });
+    },[castleLayout.autoMessages])
 
     const {
         score,
@@ -454,6 +488,8 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
         areAllCastlesCaptured,
         isGameLost,
         lostGaurdCounter,
+        botImageLoading,
+        botImagePath,
     } = castleLayout;
 
     return (
@@ -503,7 +539,7 @@ const  Page:NextPage<PropsWithChildren>  = (props:PropsWithChildren) => {
                         <MessageBox content={autoMessages}/>
                     </Col>
                     <Col lg={2}>
-                        <BotImageBox imagePath="" altText=""/>
+                        <BotImageBox imagePath={botImagePath} isLoading={botImageLoading} altText="image"/>
                     </Col>
                 </Row>
                 <div className={classes.closeButton}>

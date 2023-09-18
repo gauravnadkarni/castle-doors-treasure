@@ -107,7 +107,7 @@ const GAME_STORY = {
         The player continues to choose doors as long as they have at least one health remaining.
         Upon finding a door that leads to safe passage, the player moves to the next level or the next castle.`,
         `Winning: The player wins the game by successfully reaching the treasure in all castles.`,
-        `Losing: The player loses if they run out of both lives and armor, making it impossible to proceed.`,
+        `Losing: The player loses if they run out of lives(health), making it impossible to proceed.`,
     ]
 }
 
