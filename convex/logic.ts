@@ -9,7 +9,7 @@ import { resolve } from "path";
 const apiKey = process.env.OPENAI_API_KEY!;
 const organization = process.env.OPENAI_ORGANIZATION!;
 const openai = new OpenAI({
-    apiKey:"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",// defaults to process.env["OPENAI_API_KEY"]
+    apiKey// defaults to process.env["OPENAI_API_KEY"]
 });
 
 //to be used as fallback if chatgpt is unable to get proper response
